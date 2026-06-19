@@ -510,5 +510,34 @@
         document.querySelectorAll('.color-btn').forEach(b => b.addEventListener('click', (e) => brushColor = e.target.getAttribute('data-color')));
         document.getElementById('clearCanvas').addEventListener('click', () => ctx.clearRect(0,0,canvas.width,canvas.height));
     </script>
+
+    <!-- Fallback: allow clicking the splash or auto-hide after 6s if enterWebsite doesn't run -->
+    <script>
+    (function(){
+      function safeEnter(){
+        if(typeof enterWebsite === 'function'){
+          try{ enterWebsite(); }catch(e){
+            var sp=document.getElementById('splashPage'); if(sp) sp.style.display='none';
+          }
+        } else {
+          var sp=document.getElementById('splashPage'); if(sp) sp.style.display='none';
+        }
+      }
+
+      function onClickOnce(e){
+        var sp=document.getElementById('splashPage'); if(!sp) return;
+        if(e.target.closest && e.target.closest('#splashPage')){
+          safeEnter();
+          document.removeEventListener('click', onClickOnce, true);
+        }
+      }
+
+      // Listen in capture phase to ensure we get the click before other handlers
+      document.addEventListener('click', onClickOnce, true);
+
+      // Auto-hide after 6 seconds as a fallback
+      setTimeout(function(){ var sp=document.getElementById('splashPage'); if(sp) safeEnter(); }, 6000);
+    })();
+    </script>
 </body>
 </html>
