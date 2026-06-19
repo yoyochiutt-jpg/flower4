@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>荷花4 - 學生作品集 (中國風古典展廳)</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- 引入 FontAwesome 圖標庫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Noto Serif TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght=400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 🎨 全網頁滑鼠指針變為中國古典卡通毛筆，並設定 0 40 讓筆尖精準點擊 */
+        html, body, button, input, textarea, a, canvas, [onclick] {
+            cursor: url('https://images.rawpixel.com/image_png_1000/czM6Ly9yYXduaXxlbC1pbWFnZXMvY2hmdWxsLzQ5MmU3NWJjLWNlOTQtNDgyNS1hOTFlLTI1MGQ5OGM0MzVjMC5wbmc.png') 0 40, 
+                   url('https://cdn-icons-png.flaticon.com/512/3815/3815286.png') 0 40,
+                   auto !important;
+        }
+
+        body {
+            font-family: 'Noto Serif TC', serif;
+            background-color: #fbfaf5; /* 核心區預設背景變回米白色 */
+            overflow-x: hidden; 
+        }
+
+        /* 1. 封面頁樣式 (使用 download.gif) */
+        #splashPage {
+            background-image: url('download.gif');
+            background-size: cover;
+            background-position: center;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+        }
+
+        /* 2. 英雄區背景：米白色宣紙上帶有些許水墨的質感 */
+        .hero-rice-paper {
+            background-color: #fbfaf5;
+            background-image: radial-gradient(circle at 80% 20%, rgba(28, 25, 23, 0.04) 0%, transparent 40%),
+                              radial-gradient(circle at 15% 75%, rgba(28, 25, 23, 0.03) 0%, transparent 35%);
+            position: relative;
+        }
+
+        /* 畫框基礎樣式 */
+        .uploaded-frame-card {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            border: 10px solid #1c1917; /* 深色中式實木外框 */
+            background-color: #fcfbf9;
+            transition: transform 0.3s ease;
+        }
+
+        /* 頂部飄蕩花朵動畫 */
+        @keyframes floatAndSwayTopZone {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(20px, -25px) rotate(3deg); }
+            50% { transform: translate(45px, 8px) rotate(-3deg); }
+            75% { transform: translate(20px, 35px) rotate(2deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        .floating-flower-topzone {
+            position: absolute; 
+            pointer-events: auto;
+            z-index: 45; 
+            animation: floatAndSwayTopZone 14s ease-in-out infinite;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+        .floating-flower-topzone img {
+            min-width: 4cm;
+            min-height: 4cm;
+            object-fit: contain;
+        }
+
+        /* 🌟 作品集背景用回 download.gif，並疊加一層灰色半透明遮罩 */
+        .gallery-bg-zone {
+            position: relative;
+            background-image: url('download.gif');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        /* 灰色半透明遮罩層 (Overlay) */
+        .gallery-bg-zone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: rgba(100, 110, 120, 0.45); /* 沉穩優雅的灰色遮罩 */
+            z-index: 1;
+        }
+
+        .preview-card {
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .preview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body class="text-[#2c2c2c] selection:bg-[#9d2933] selection:text-white relative">
+
+    <!-- 封面頁 (使用 download.gif 背景) -->
+    <div id="splashPage" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-stone-900">
+        <div class="absolute inset-0 bg-stone-900/30"></div>
+        
+        <div class="text-center relative z-10 px-4">
+            <h2 class="text-stone-900 text-4xl md:text-5xl font-bold tracking-[0.3em] mb-4 drop-shadow-md">墨荷美育展廳</h2>
+            <p class="text-stone-800 text-sm md:text-base tracking-widest mb-12 font-medium opacity-90">學生古典水墨畫作選集</p>
+            
+            <button onclick="enterWebsite()" class="inline-block bg-stone-900 text-white border border-stone-800 px-10 py-4 rounded-sm tracking-[0.2em] text-sm font-medium hover:bg-[#9d2933] hover:border-[#9d2933] shadow-xl transition-all duration-500 cursor-pointer group">
+                點擊步入展廳 <i class="fa-solid fa-arrow-right ml-2 text-xs transition-transform group-hover:translate-x-1"></i>
+            </button>
+        </div>
+    </div>
+
+
+    <!-- 1. 導覽列 (Navbar) -->
+    <nav id="navbar" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-transparent py-4 px-6 md:px-12 flex justify-between items-center">
+        <div class="text-2xl font-bold tracking-widest text-stone-900">
+            墨荷<span class="text-[#9d2933]">美育</span> <span class="text-xs font-normal align-super text-stone-400">v4</span>
+        </div>
+        
+        <!-- 電腦版導覽選單 -->
+        <div class="hidden md:flex space-x-8 text-sm font-medium tracking-wide text-stone-800">
+            <a href="#hero" class="hover:text-[#9d2933] transition-colors duration-300">關於特色</a>
+            <a href="#gallery" class="hover:text-[#9d2933] transition-colors duration-300">作品集</a>
+            <a href="#interactive" class="text-[#9d2933] hover:text-[#7a1f26] font-bold transition-colors duration-300"><i class="fa-solid fa-paintbrush mr-1"></i> 繪畫互動坊</a>
+        </div>
+
+        <!-- 右側控制區 -->
+        <div class="hidden md:flex items-center space-x-4">
+            <button id="adminToggle" class="bg-neutral-800 text-xs text-stone-300 px-3 py-1.5 rounded hover:bg-neutral-900 transition-all cursor-pointer">
+                <i class="fa-solid fa-user-shield mr-1"></i> 切換管理員模式
+            </button>
+        </div>
+
+        <!-- 手機版漢堡選單按鈕 -->
+        <button id="menuBtn" class="md:hidden text-2xl text-stone-900 focus:outline-none cursor-pointer">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- 手機版下拉選單 -->
+        <div id="mobileMenu" class="hidden absolute top-full left-0 w-full bg-[#fbfaf7]/95 backdrop-blur-md shadow-lg flex flex-col p-6 space-y-4 text-center border-t border-stone-200">
+            <a href="#hero" onclick="toggleMobileMenu()" class="py-2 text-stone-700 hover:text-[#9d2933]">關於特色</a>
+            <a href="#gallery" onclick="toggleMobileMenu()" class="py-2 text-stone-700 hover:text-[#9d2933]">作品集</a>
+            <a href="#interactive" onclick="toggleMobileMenu()" class="py-2 text-[#9d2933] font-bold">繪畫互動坊</a>
+            <div class="pt-2 flex flex-col space-y-2">
+                <button id="adminToggleMobile" onclick="toggleAdminMode(); toggleMobileMenu();" class="bg-neutral-800 text-xs text-stone-300 py-2 rounded">
+                    <i class="fa-solid fa-user-shield"></i> 管理員模式
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 2. 英雄區 (Hero Section) -->
+    <section id="hero" class="hero-rice-paper min-h-screen pt-24 pb-16 flex flex-col items-center justify-center">
+        <div id="topZoneFlowerStage" class="absolute inset-0 pointer-events-none z-40 overflow-hidden"></div>
+
+        <div class="text-center px-4 max-w-3xl mb-16 relative z-10">
+            <h1 class="text-6xl md:text-8xl font-bold tracking-widest text-stone-900 mb-2">荷花</h1>
+            <p class="text-xl md:text-2xl text-[#9d2933] tracking-widest font-medium mb-6">學生作品集</p>
+            <div class="w-16 h-0.5 bg-[#9d2933] mx-auto mb-6"></div>
+        </div>
+
+        <!-- 3種水墨特色介紹區 -->
+        <div class="max-w-7xl mx-auto px-6 w-full relative z-10">
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- 濃墨 -->
+                <div class="bg-white border border-stone-200 p-8 rounded flex flex-col justify-between preview-card">
+                    <div>
+                        <div class="flex items-center space-x-3 mb-5">
+                            <span class="w-10 h-10 rounded-full bg-stone-900 text-white flex items-center justify-center font-bold text-base shadow-sm">濃</span>
+                            <h3 class="text-xl font-bold text-stone-900 tracking-wide">濃墨特徵</h3>
+                        </div>
+                        <p class="text-stone-700 text-sm leading-relaxed mb-8 tracking-wide">
+                            濃墨含水量極少，墨色烏黑發亮。在構圖中多用於勾勒前景輪廓、刻畫視覺核心，強烈的黑白對比能一筆定形，賦予整體畫面穩重挺拔的視覺骨架。
+                        </p>
+                    </div>
+                    <div class="h-64 rounded overflow-hidden relative border border-stone-200 bg-[#faf9f6] shadow-inner flex items-center justify-center p-2">
+                        <img src="濃墨.jpeg" onerror="this.src='濃墨.jpg'; this.onerror=()=>this.src='https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=500&q=80'" class="max-w-full max-h-full object-contain cursor-zoom-in" alt="濃墨特徵" onclick="openImageModal(this.src, '濃墨特徵')">
+                    </div>
+                </div>
+
+                <!-- 淡墨 -->
+                <div class="bg-white border border-stone-200 p-8 rounded flex flex-col justify-between preview-card">
+                    <div>
+                        <div class="flex items-center space-x-3 mb-5">
+                            <span class="w-10 h-10 rounded-full bg-stone-400 text-white flex items-center justify-center font-bold text-base shadow-sm">淡</span>
+                            <h3 class="text-xl font-bold text-stone-900 tracking-wide">淡墨特徵</h3>
+                        </div>
+                        <p class="text-stone-700 text-sm leading-relaxed mb-8 tracking-wide">
+                            淡墨透過大量水分稀釋，呈現出豐富柔和且細膩的灰色層次。主要用於暈染遠景、鋪陳大面積的光影受光面，是營造水氣氤氳、虛實相生空間感的關鍵。
+                        </p>
+                    </div>
+                    <div class="h-64 rounded overflow-hidden relative border border-stone-200 bg-[#faf9f6] shadow-inner flex items-center justify-center p-2">
+                        <img src="淡墨.jpeg" onerror="this.src='淡墨.jpg'; this.onerror=()=>this.src='https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?auto=format&fit=crop&w=500&q=80'" class="max-w-full max-h-full object-contain cursor-zoom-in" alt="淡墨特徵" onclick="openImageModal(this.src, '淡墨特徵')">
+                    </div>
+                </div>
+
+                <!-- 留白 -->
+                <div class="bg-white border border-stone-200 p-8 rounded flex flex-col justify-between preview-card">
+                    <div>
+                        <div class="flex items-center space-x-3 mb-5">
+                            <span class="w-10 h-10 rounded-full bg-stone-100 border border-stone-400 text-stone-800 flex items-center justify-center font-bold text-base shadow-sm">白</span>
+                            <h3 class="text-xl font-bold text-stone-900 tracking-wide">留白意境</h3>
+                        </div>
+                        <p class="text-stone-700 text-sm leading-relaxed mb-8 tracking-wide">
+                            留白是東方傳統美學的最高境界。紙面上的未著墨處並非空無一物，而是化作無限的空間延伸，不著一筆卻氣脈貫通，給予視覺最完美的呼吸與想像餘地。
+                        </p>
+                    </div>
+                    <div class="h-64 rounded overflow-hidden relative border border-stone-200 bg-[#faf9f6] shadow-inner flex items-center justify-center p-2">
+                        <img src="留白.jpeg" onerror="this.src='留白.jpg'; this.onerror=()=>this.src='https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=80'" class="max-w-full max-h-full object-contain cursor-zoom-in" alt="留白意境" onclick="openImageModal(this.src, '留白意境')">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 彈窗外殼 -->
+    <div id="imageModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-xs flex flex-col items-center justify-center p-4 cursor-zoom-out" onclick="closeImageModal()">
+        <div class="absolute top-4 right-6 text-white text-3xl font-light cursor-pointer select-none">&times;</div>
+        <div class="max-w-[90vw] max-h-[80vh] flex items-center justify-center">
+            <img id="modalImg" src="" class="max-w-full max-h-full object-contain border-4 border-stone-800 bg-white p-1 shadow-2xl" alt="放大圖">
+        </div>
+        <p id="modalCaption" class="text-stone-300 text-base tracking-widest font-medium mt-4 bg-stone-900/80 px-4 py-1.5 rounded"></p>
+    </div>
+
+    <!-- 3. 作品集展示區 (使用 download.gif 背景 + 灰色融合遮罩) -->
+    <section id="gallery" class="gallery-bg-zone py-24 relative min-h-[60vh] flex flex-col justify-center">
+        <!-- 確保內容在遮罩層之上 -->
+        <div class="max-w-7xl mx-auto px-6 relative z-10 w-full text-stone-900">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-widest mb-2 text-stone-950">水墨荷花藝術作品集</h2>
+                <p class="text-xs text-stone-800 tracking-widest">煙雨朦朧古典展廳：以下為展示之動態畫作與學生作品</p>
+                <div class="w-12 h-0.5 bg-[#9d2933] mx-auto mt-4"></div>
+            </div>
+
+            <div id="adminNotice" class="hidden bg-[#9d2933]/10 border border-[#9d2933]/40 text-stone-800 text-center py-2 px-4 rounded mb-8 max-w-md mx-auto text-xs">
+                <i class="fa-solid fa-unlock-keyhole mr-1"></i> 管理員模式已開啟，您可以點擊右上角「✕」移除作品。
+            </div>
+
+            <div id="uploadedCardGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 畫框一 -->
+                <div class="uploaded-frame-card p-4 rounded-xs">
+                    <div class="h-64 bg-stone-100 overflow-hidden relative border border-stone-300 flex items-center justify-center bg-[#faf9f6]">
+                        <img src="晴.gif" onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=500&q=80'" class="max-w-full max-h-full object-contain cursor-zoom-in" onclick="openImageModal(this.src, '《晴》')" alt="晴">
+                    </div>
+                    <div class="mt-3 border-t border-stone-200 pt-2 text-center text-stone-900">
+                        <h4 class="font-bold text-base tracking-wider">《晴》</h4>
+                        <p class="text-xs text-stone-500 mt-0.5">學生動態作品</p>
+                    </div>
+                </div>
+
+                <!-- 🌟 雅、儀 兩組畫框及其所有資料已精確移除 -->
+
+                <div id="dynamicCardsContents" class="contents"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. 互動坊區 (維持乾淨舒適的米白色底色) -->
+    <section id="interactive" class="py-24 px-6 bg-[#fbfaf5] relative z-20">
+        <div class="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+            <!-- 互動一：本地檔案上載展出 -->
+            <div class="bg-white p-8 rounded border border-stone-200 flex flex-col justify-between shadow-xs">
+                <div>
+                    <div class="flex items-center space-x-3 mb-6 text-[#9d2933]">
+                        <i class="fa-solid fa-images text-2xl"></i>
+                        <h3 class="text-xl font-bold text-stone-800">上載作品展出</h3>
+                    </div>
+                    <form id="uploadForm" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">學生姓名</label>
+                            <input type="text" id="upArtist" required class="w-full px-4 py-2 border border-stone-300 rounded text-sm focus:outline-none focus:border-[#9d2933]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">大作題名</label>
+                            <input type="text" id="upTitle" required class="w-full px-4 py-2 border border-stone-300 rounded text-sm focus:outline-none focus:border-[#9d2933]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">選擇檔案 (支援普通圖或自製 GIF)</label>
+                            <div class="w-full border border-stone-300 rounded p-2.5 bg-stone-50/50">
+                                <input type="file" id="upFile" accept="image/*" required class="w-full text-xs text-stone-500 file:mr-4 file:py-1.5 file:px-3 file:rounded file:border file:border-stone-300 file:bg-white file:text-stone-700 file:font-medium hover:file:bg-stone-50 cursor-pointer">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <button type="submit" form="uploadForm" class="w-full mt-8 bg-stone-900 text-white py-3 rounded text-sm tracking-widest hover:bg-stone-800 transition-all cursor-pointer">
+                    發布作品至作品集
+                </button>
+            </div>
+
+            <!-- 互動二：即時線上繪製 -->
+            <div class="bg-white p-8 rounded border border-stone-200 flex flex-col justify-between shadow-xs">
+                <div>
+                    <div class="flex items-center justify-between mb-4 text-[#9d2933]">
+                        <div class="flex items-center space-x-3">
+                            <i class="fa-solid fa-palette text-2xl"></i>
+                            <h3 class="text-xl font-bold text-stone-800">即時線上繪製</h3>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <button class="color-btn w-5 h-5 rounded-full bg-stone-950 border border-stone-400" data-color="#0c0a09" data-size="5"></button>
+                            <button class="color-btn w-5 h-5 rounded-full bg-stone-400" data-color="#78716c" data-size="11"></button>
+                            <button class="color-btn w-5 h-5 rounded-full bg-[#9d2933]" data-color="#9d2933" data-size="7"></button>
+                            <button id="clearCanvas" class="text-xs text-stone-400 hover:text-stone-700 ml-1"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                    <div class="bg-[#fdfcfb] border border-stone-200 rounded overflow-hidden relative" style="height: 180px;">
+                        <canvas id="paintCanvas" class="w-full h-full cursor-crosshair"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        <input type="text" id="drawArtist" placeholder="學生姓名" class="w-full px-3 py-1.5 border border-stone-300 rounded text-xs focus:outline-none focus:border-[#9d2933]">
+                        <input type="text" id="drawTitle" placeholder="落款" class="w-full px-3 py-1.5 border border-stone-300 rounded text-xs focus:outline-none focus:border-[#9d2933]">
+                    </div>
+                </div>
+                <button id="submitDrawBtn" class="w-full mt-6 bg-[#9d2933] text-white py-3 rounded text-sm tracking-widest hover:bg-[#7a1f26] transition-all cursor-pointer">
+                    提取花卉升空至頂部飄蕩
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. 頁尾版權宣言 (保持大字、加粗純白呈現) -->
+    <footer class="bg-stone-950 text-white py-10 text-center text-base font-medium tracking-widest relative z-30 border-t border-stone-900 shadow-2xl">
+        &copy; 2026 Miss CHIU Tsang Tung. 版權所有.
+    </footer>
+
+    <!-- Toast 通知 -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-stone-900 text-stone-100 px-5 py-3 rounded-sm border-l-4 border-[#9d2933] opacity-0 transition-all duration-300 text-sm">
+        <span id="toastMsg">正在處理...</span>
+    </div>
+
+    <!-- 前端邏輯 JS 程式碼 -->
+    <script>
+        let isAdminMode = false;
+
+        const navbar = document.getElementById('navbar');
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const dynamicCardsContents = document.getElementById('dynamicCardsContents');
+        const topZoneFlowerStage = document.getElementById('topZoneFlowerStage');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+
+        window.enterWebsite = function() {
+            const splash = document.getElementById('splashPage');
+            splash.style.opacity = '0';
+            splash.style.visibility = 'hidden';
+            setTimeout(() => {
+                document.getElementById('hero').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 40) navbar.classList.add('bg-[#fbfaf7]/90', 'backdrop-blur-md', 'shadow-sm', 'py-3');
+            else navbar.classList.remove('bg-[#fbfaf7]/90', 'backdrop-blur-md', 'shadow-sm', 'py-3');
+        });
+
+        function fireToast(msg) {
+            toastMsg.innerText = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 3000);
+        }
+
+        window.toggleMobileMenu = function() { mobileMenu.classList.toggle('hidden'); }
+        menuBtn.addEventListener('click', toggleMobileMenu);
+
+        window.openImageModal = function(src, cap) {
+            document.getElementById('modalImg').src = src;
+            document.getElementById('modalCaption').innerText = cap;
+            document.getElementById('imageModal').classList.remove('hidden');
+        }
+        window.closeImageModal = function() { document.getElementById('imageModal').classList.add('hidden'); }
+
+        function loadLocalData() {
+            const localCards = JSON.parse(localStorage.getItem('lotus_cards') || '[]');
+            dynamicCardsContents.innerHTML = '';
+            localCards.forEach((card, idx) => {
+                const html = `
+                    <div class="uploaded-frame-card p-4 rounded-xs relative">
+                        ${isAdminMode ? `
+                        <button onclick="deleteCard(${idx})" class="absolute top-2 right-2 bg-[#9d2933] text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-[#7a1f26] z-30 cursor-pointer">✕</button>
+                        ` : ''}
+                        <div class="h-64 bg-stone-100 overflow-hidden relative border border-stone-300 flex items-center justify-center bg-[#faf9f6]">
+                            <img src="${card.url}" class="w-full h-full object-cover cursor-zoom-in" onclick="openImageModal(this.src, '《${card.title}》')">
+                        </div>
+                        <div class="mt-3 border-t border-stone-200 pt-2 text-center text-stone-900">
+                            <h4 class="font-bold text-base tracking-wider">《${card.title}》</h4>
+                            <p class="text-xs text-stone-500 mt-0.5">學生：${card.artist}</p>
+                        </div>
+                    </div>
+                `;
+                dynamicCardsContents.insertAdjacentHTML('beforeend', html);
+            });
+
+            const localFlowers = JSON.parse(localStorage.getItem('lotus_flowers') || '[]');
+            topZoneFlowerStage.innerHTML = '';
+            localFlowers.forEach((flower, idx) => {
+                const node = document.createElement('div');
+                node.className = 'floating-flower-topzone';
+                node.style.left = flower.x + '%';
+                node.style.top = flower.y + 'px';
+                node.style.animationDelay = flower.delay + 's';
+                node.style.animationDuration = flower.duration + 's';
+                node.innerHTML = `
+                    <div class="relative group">
+                        ${isAdminMode ? `<button onclick="event.stopPropagation(); deleteFlower(${idx})" class="absolute -top-2 -right-2 bg-red-700 text-white text-[9px] w-4 h-4 rounded-full">✕</button>` : ''}
+                        <img src="${flower.url}" style="width: ${flower.size}cm; height: ${flower.size}cm;" title="${flower.artist}: 《${flower.title}》">
+                    </div>
+                `;
+                topZoneFlowerStage.appendChild(node);
+            });
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const file = document.getElementById('upFile').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const localCards = JSON.parse(localStorage.getItem('lotus_cards') || '[]');
+                localCards.unshift({
+                    artist: document.getElementById('upArtist').value,
+                    title: document.getElementById('upTitle').value,
+                    url: event.target.result
+                });
+                try {
+                    localStorage.setItem('lotus_cards', JSON.stringify(localCards));
+                    fireToast("✨ 作品成功發布至展廳！");
+                    document.getElementById('uploadForm').reset();
+                    loadLocalData();
+                } catch (err) {
+                    alert("由於檔案體積超出了瀏覽器限制，本地上傳失敗。請嘗試更小的圖檔！");
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('submitDrawBtn').addEventListener('click', function() {
+            const imgDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let isBlank = true;
+            for (let i = 3; i < imgDataObj.data.length; i += 4) { if (imgDataObj.data[i] > 0) { isBlank = false; break; } }
+            if (isBlank) { alert("請先在畫板上作畫！"); return; }
+
+            const dataUrl = canvas.toDataURL('image/png');
+            const localFlowers = JSON.parse(localStorage.getItem('lotus_flowers') || '[]');
+            localFlowers.push({
+                artist: document.getElementById('drawArtist').value || "學生",
+                title: document.getElementById('drawTitle').value || "墨韻",
+                url: dataUrl,
+                x: Math.floor(Math.random() * 75) + 5,
+                y: Math.floor(Math.random() * 260) + 50,
+                delay: -(Math.random() * 10),
+                duration: Math.floor(Math.random() * 5) + 11,
+                size: (Math.random() * 0.8) + 4.1
+            });
+            
+            try {
+                localStorage.setItem('lotus_flowers', JSON.stringify(localFlowers));
+                fireToast("🎨 畫作已提取並成功升空飄蕩！");
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                document.getElementById('drawArtist').value = '';
+                document.getElementById('drawTitle').value = '';
+                loadLocalData();
+            } catch (e) {
+                alert("儲存空間已滿，無法提取！");
+            }
+        });
+
+        window.deleteCard = function(idx) {
+            const localCards = JSON.parse(localStorage.getItem('lotus_cards') || '[]');
+            localCards.splice(idx, 1);
+            localStorage.setItem('lotus_cards', JSON.stringify(localCards));
+            loadLocalData();
+        }
+        window.deleteFlower = function(idx) {
+            const localFlowers = JSON.parse(localStorage.getItem('lotus_flowers') || '[]');
+            localFlowers.splice(idx, 1);
+            localStorage.setItem('lotus_flowers', JSON.stringify(localFlowers));
+            loadLocalData();
+        }
+
+        window.toggleAdminMode = function() {
+            isAdminMode = !isAdminMode;
+            document.getElementById('adminNotice').classList.toggle('hidden', !isAdminMode);
+            loadLocalData();
+        }
+        document.getElementById('adminToggle').addEventListener('click', toggleAdminMode);
+
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false; let brushColor = '#0c0a09'; let brushSize = 5;
+
+        function initCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width; canvas.height = rect.height;
+        }
+        window.addEventListener('load', () => { initCanvas(); loadLocalData(); });
+
+        canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            ctx.strokeStyle = brushColor; ctx.lineWidth = brushSize;
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke();
+        });
+        window.addEventListener('mouseup', () => isDrawing = false);
+        document.querySelectorAll('.color-btn').forEach(b => b.addEventListener('click', (e) => brushColor = e.target.getAttribute('data-color')));
+        document.getElementById('clearCanvas').addEventListener('click', () => ctx.clearRect(0,0,canvas.width,canvas.height));
+    </script>
+</body>
+</html>
