@@ -96,6 +96,9 @@
             transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.08);
         }
+
+        /* Ensure touch drawing works by disabling default touch actions on canvas */
+        canvas#paintCanvas { touch-action: none; -ms-touch-action: none; }
     </style>
 </head>
 <body class="text-[#2c2c2c] selection:bg-[#9d2933] selection:text-white relative">
@@ -178,7 +181,7 @@
                         </p>
                     </div>
                     <div class="h-64 rounded overflow-hidden relative border border-stone-200 bg-[#faf9f6] shadow-inner flex items-center justify-center p-2">
-                        <img src="濃墨.jpeg" onerror="this.src='濃墨.jpg'; this.onerror=()=>this.src='https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=500&q=80'" class="max-w-full max-h-full object-contain">
+                        <img src="濃墨.jpeg" onerror="this.src='濃墨.jpg'; this.onerror=()=>this.src='https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=500&q=80'" onclick="openImageModal(this.src,'《濃墨》')" class="max-w-full max-h-full object-contain">
                     </div>
                 </div>
 
@@ -194,7 +197,7 @@
                         </p>
                     </div>
                     <div class="h-64 rounded overflow-hidden relative border border-stone-200 bg-[#faf9f6] shadow-inner flex items-center justify-center p-2">
-                        <img src="淡墨.jpeg" onerror="this.src='淡墨.jpg'; this.onerror=()=>this.src='https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?auto=format&fit=crop&w=500&q=80'" class="max-w-full max-h-full object-contain">
+                        <img src="淡墨.jpeg" onerror="this.src='淡墨.jpg'; this.onerror=()=>this.src='https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?auto=format&fit=crop&w=500&q=80'" onclick="openImageModal(this.src,'《淡墨》')" class="max-w-full max-h-full object-contain">
                     </div>
                 </div>
 
@@ -210,7 +213,7 @@
                         </p>
                     </div>
                     <div class="h-64 rounded overflow-hidden relative border border-stone-200 bg-[#faf9f6] shadow-inner flex items-center justify-center p-2">
-                        <img src="留白.jpeg" onerror="this.src='留白.jpg'; this.onerror=()=>this.src='https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=80'" class="max-w-full max-h-full object-contain">
+                        <img src="留白.jpeg" onerror="this.src='留白.jpg'; this.onerror=()=>this.src='https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=80'" onclick="openImageModal(this.src,'《留白》')" class="max-w-full max-h-full object-contain">
                     </div>
                 </div>
             </div>
@@ -244,7 +247,7 @@
                 <!-- 畫框一 -->
                 <div class="uploaded-frame-card p-4 rounded-xs">
                     <div class="h-64 bg-stone-100 overflow-hidden relative border border-stone-300 flex items-center justify-center bg-[#faf9f6]">
-                        <img src="晴.gif" onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=500&q=80'" class="max-w-full max-h-full object-contain">
+                        <img src="晴.gif" onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=500&q=80'" class="max-w-full max-h-full object-co[...]">
                     </div>
                     <div class="mt-3 border-t border-stone-200 pt-2 text-center text-stone-900">
                         <h4 class="font-bold text-base tracking-wider">《晴》</h4>
@@ -281,7 +284,7 @@
                         <div>
                             <label class="block text-xs font-bold text-stone-600 mb-1">選擇檔案 (支援普通圖或自製 GIF)</label>
                             <div class="w-full border border-stone-300 rounded p-2.5 bg-stone-50/50">
-                                <input type="file" id="upFile" accept="image/*" required class="w-full text-xs text-stone-500 file:mr-4 file:py-1.5 file:px-3 file:rounded file:border file:border-stone-200">
+                                <input type="file" id="upFile" accept="image/*" required class="w-full text-xs text-stone-500 file:mr-4 file:py-1.5 file:px-3 file:rounded file:border file:border-[...]
                             </div>
                         </div>
                     </form>
@@ -499,14 +502,49 @@
         }
         window.addEventListener('load', () => { initCanvas(); loadLocalData(); });
 
-        canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
-            ctx.strokeStyle = brushColor; ctx.lineWidth = brushSize;
-            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-            ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke();
-        });
-        window.addEventListener('mouseup', () => isDrawing = false);
+        // Pointer/Touch-enabled drawing (works on desktop & mobile)
+        function getPointerPos(e) {
+          const rect = canvas.getBoundingClientRect();
+          const clientX = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX);
+          const clientY = (e.clientY !== undefined) ? e.clientY : (e.touches && e.touches[0] && e.touches[0].clientY);
+          return { x: (clientX - rect.left), y: (clientY - rect.top) };
+        }
+
+        function startDraw(e) {
+          e.preventDefault();
+          isDrawing = true;
+          const pos = getPointerPos(e);
+          ctx.beginPath();
+          ctx.moveTo(pos.x, pos.y);
+          if (e.pointerId && canvas.setPointerCapture) try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
+        }
+        function drawMove(e) {
+          if (!isDrawing) return;
+          e.preventDefault();
+          const pos = getPointerPos(e);
+          ctx.strokeStyle = brushColor;
+          ctx.lineWidth = brushSize;
+          ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+          ctx.lineTo(pos.x, pos.y);
+          ctx.stroke();
+        }
+        function endDraw(e) {
+          if (!isDrawing) return;
+          isDrawing = false;
+          if (e.pointerId && canvas.releasePointerCapture) try{ canvas.releasePointerCapture(e.pointerId); }catch(_){}
+        }
+
+        canvas.addEventListener('pointerdown', startDraw, {passive:false});
+        canvas.addEventListener('pointermove', drawMove, {passive:false});
+        canvas.addEventListener('pointerup', endDraw);
+        canvas.addEventListener('pointercancel', endDraw);
+        // touch fallback for older browsers
+        canvas.addEventListener('touchstart', startDraw, {passive:false});
+        canvas.addEventListener('touchmove', drawMove, {passive:false});
+        canvas.addEventListener('touchend', endDraw);
+
+        window.addEventListener('resize', () => { initCanvas(); });
+
         document.querySelectorAll('.color-btn').forEach(b => b.addEventListener('click', (e) => brushColor = e.target.getAttribute('data-color')));
         document.getElementById('clearCanvas').addEventListener('click', () => ctx.clearRect(0,0,canvas.width,canvas.height));
     </script>
